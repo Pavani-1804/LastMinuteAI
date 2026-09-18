@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Companion — AI-Powered Learning Workspace</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <h2>Study<span class="highlight">AI</span></h2>
+            </div>
+
+            <div class="active-project-picker">
+                <label><i class="fa-solid fa-folder-tree"></i> Active Project</label>
+                <select id="project-selector" onchange="switchProject(this.value)">
+                    <option value="">Select a Project...</option>
+                </select>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-section">LEARNING WORKSPACE</div>
+                <a href="#" class="nav-item active" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i> Home & Spaces</a>
+                <a href="#" class="nav-item" onclick="switchTab('materials')"><i class="fa-solid fa-file-pdf"></i> Materials & Knowledge</a>
+                <a href="#" class="nav-item" onclick="switchTab('tutor')"><i class="fa-solid fa-robot"></i> AI Tutor Chat</a>
+                <a href="#" class="nav-item" onclick="switchTab('quiz')"><i class="fa-solid fa-list-check"></i> Adaptive Assessment</a>
+                <a href="#" class="nav-item" onclick="switchTab('mastery')"><i class="fa-solid fa-chart-line"></i> Mastery & Growth</a>
+                <a href="#" class="nav-item" onclick="switchTab('flashcards')"><i class="fa-solid fa-layer-group"></i> 3D Flashcards & Spaced Rep</a>
+                <a href="#" class="nav-item" onclick="switchTab('conceptmap')"><i class="fa-solid fa-diagram-project"></i> Concept Maps & Plan</a>
+                <a href="#" class="nav-item" onclick="switchTab('analytics')"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                
+                <div class="nav-section">PLATFORM & OBSERVABILITY</div>
+                <a href="#" class="nav-item" onclick="switchTab('admin')"><i class="fa-solid fa-shield-halved"></i> Admin & AI Health</a>
+            </nav>
+
+            <div class="user-profile" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div class="avatar"><i class="fa-solid fa-user-gear"></i></div>
+                    <div class="user-info">
+                        <span id="user-name-display" class="user-name">Guest</span>
+                        <span id="user-role-badge" class="badge">User</span>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-outline" title="Logout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </aside>
+
+        <!-- Main Content View Area -->
+        <main class="main-content">
+            <!-- Top Header Bar -->
+            <header class="top-header">
+                <div class="breadcrumb">
+                    <span id="bc-space">Computer Science</span> <i class="fa-solid fa-chevron-right"></i> <span id="bc-project" class="current">Machine Learning Foundations</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="openCreateSpaceModal()"><i class="fa-solid fa-plus"></i> New Space</button>
+                    <button class="btn btn-primary" onclick="openCreateProjectModal()"><i class="fa-solid fa-folder-plus"></i> New Project</button>
+                </div>
+            </header>
+
+            <!-- TAB 1: HOME & DASHBOARD -->
+            <section id="tab-dashboard" class="tab-pane active">
+                <div class="welcome-banner">
+                    <div class="banner-text">
+                        <h1>Welcome back to your <span class="highlight-gradient">Learning Companion</span></h1>
+                        <p>Manage your spaces, projects, and active recommended learning actions.</p>
+                    </div>
+                    <div class="quick-stats">
+                        <div class="stat-card">
+                            <i class="fa-solid fa-bullseye icon-indigo"></i>
+                            <div>
+                                <span class="stat-val" id="dash-mastery">72%</span>
+                                <span class="stat-lbl">Overall Mastery</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fa-solid fa-book-open icon-purple"></i>
+                            <div>
+                                <span class="stat-val" id="dash-materials-cnt">3</span>
+                                <span class="stat-lbl">Processed Docs</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fa-solid fa-triangle-exclamation icon-amber"></i>
+                            <div>
+                                <span class="stat-val" id="dash-weak-cnt">1</span>
+                                <span class="stat-lbl">Weak Concepts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Recommended Next Action -->
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-wand-magic-sparkles" style="color:#818cf8; margin-right:8px;"></i> Recommended Next Step</h3>
+                        <div id="recommended-next-container" class="recommended-box">
+                            <div class="rec-badge high">High Priority</div>
+                            <h4 id="rec-title">Practice Overfitting & Regularization</h4>
+                            <p id="rec-desc">Your understanding of Overfitting is currently at 45%. Take a short 4-question adaptive assessment to reinforce key ideas.</p>
+                            <button class="btn btn-primary" onclick="switchTab('quiz')"><i class="fa-solid fa-play"></i> Start Recommended Assessment</button>
+                        </div>
+                    </div>
+
+                    <!-- Spaces & Projects List -->
+                    <div class="glass-card">
+                        <div class="card-header" style="margin-bottom:16px;">
+                            <h3><i class="fa-solid fa-layer-group" style="color:#c084fc; margin-right:8px;"></i> Spaces & Projects</h3>
+                        </div>
+                        <div id="spaces-list" class="spaces-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: MATERIALS & KNOWLEDGE (STRICTLY MATERIALS ONLY) -->
+            <section id="tab-materials" class="tab-pane">
+                <div class="section-header">
+                    <div>
+                        <h2><i class="fa-solid fa-file-pdf" style="color:#c084fc; margin-right:8px;"></i> Project Materials & Document Knowledge</h2>
+                        <p>Upload PDF lecture slides or textbooks. Files are processed asynchronously for AI retrieval and citation.</p>
+                    </div>
+                </div>
+
+                <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('pdf-file-input').click()">
+                    <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                    <h3>Click or Drag & Drop PDF Document Here</h3>
+                    <p>Supports PDFs up to 50MB. Asynchronous pipeline parses, chunks, and creates vector representations.</p>
+                    <input type="file" id="pdf-file-input" accept=".pdf" style="display: none;" onchange="handleFileUpload(this.files[0])">
+                </div>
+
+                <div class="glass-card">
+                    <h3>Uploaded Project Documents</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Status</th>
+                                <th>Extracted Chunks</th>
+                                <th>File Size</th>
+                                <th>Uploaded Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materials-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- TAB 3: AI TUTOR CHAT (STRICTLY TUTOR CHAT ONLY) -->
+            <section id="tab-tutor" class="tab-pane">
+                <div class="tutor-container glass-card">
+                    <div class="tutor-header">
+                        <div class="tutor-title">
+                            <i class="fa-solid fa-robot"></i>
+                            <div>
+                                <h3>AI Academic Tutor Workspace</h3>
+                                <span class="sub-text" id="tutor-context-info">Grounded in active project materials with exact page citations</span>
+                            </div>
+                        </div>
+                        <div class="tutor-actions">
+                            <button class="btn btn-sm btn-outline" onclick="loadTutorMessages()"><i class="fa-solid fa-rotate-right"></i> Refresh Session</button>
+                        </div>
+                    </div>
+
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="chat-bubble assistant">
+                            <div class="bubble-header"><i class="fa-solid fa-graduation-cap"></i> AI Tutor</div>
+                            <p>Hello! I am your AI Academic Tutor. Ask me any question grounded in your course materials!</p>
+                        </div>
+                    </div>
+
+                    <!-- Insufficient Evidence Notice Banner -->
+                    <div id="evidence-warning-banner" class="evidence-alert" style="display: none;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>The uploaded project materials do not contain sufficient evidence to answer this query reliably.</span>
+                    </div>
+
+                    <div class="chat-input-box">
+                        <input type="text" id="chat-input" placeholder="Ask a question or click microphone to speak..." onkeydown="if(event.key === 'Enter') sendChatMessage()">
+                        <button class="btn btn-outline" title="Voice Input" onclick="startVoiceRecognition()"><i class="fa-solid fa-microphone" style="color:#f43f5e;"></i></button>
+                        <button class="btn btn-primary" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: 3D FLASHCARDS & SPACED REPETITION -->
+            <section id="tab-flashcards" class="tab-pane">
+                <div class="section-header">
+                    <div>
+                        <h2><i class="fa-solid fa-layer-group" style="color:#c084fc; margin-right:8px;"></i> 3D Flashcards & Spaced Repetition Decks</h2>
+                        <p>Interactive study cards with spaced repetition intervals to reinforce long-term memory retention.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadFlashcards()"><i class="fa-solid fa-rotate"></i> Load Study Deck</button>
+                </div>
+
+                <div id="flashcards-container" class="glass-card" style="text-align:center; padding:40px;">
+                    <div class="flashcard-box" id="active-flashcard" onclick="flipFlashcard()" style="width:360px; height:220px; margin:0 auto; background:linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); border:1px solid var(--accent-indigo); border-radius:18px; display:flex; align-items:center; justify-content:center; padding:24px; cursor:pointer; box-shadow:var(--shadow-card);">
+                        <h3 id="card-text" style="font-size:20px;">Click "Load Study Deck" to start review</h3>
+                    </div>
+                    <div style="margin-top:24px; display:flex; justify-content:center; gap:14px;">
+                        <button class="btn btn-outline" onclick="rateFlashcard('again')"><i class="fa-solid fa-rotate-left" style="color:#f43f5e;"></i> Again (1 day)</button>
+                        <button class="btn btn-outline" onclick="rateFlashcard('good')"><i class="fa-solid fa-check" style="color:#fbbf24;"></i> Good (3 days)</button>
+                        <button class="btn btn-outline" onclick="rateFlashcard('easy')"><i class="fa-solid fa-star" style="color:#34d399;"></i> Easy (5 days)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: CONCEPT MAPS & LEARNING PLAN -->
+            <section id="tab-conceptmap" class="tab-pane">
+                <div class="section-header" style="flex-wrap:wrap; gap:12px;">
+                    <div>
+                        <h2><i class="fa-solid fa-diagram-project" style="color:#818cf8; margin-right:8px;"></i> Relational Concept Map & Personalized Schedule</h2>
+                        <p>Visual map of concept dependencies and your targeted step-by-step learning plan.</p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <select id="plan-timeline-select" class="form-control" style="width:auto; padding:6px 12px; font-size:13px; background:rgba(31,41,55,0.8); color:white; border-radius:8px;">
+                            <option value="2">2 Weeks (Accelerated)</option>
+                            <option value="4" selected>4 Weeks (Standard)</option>
+                            <option value="6">6 Weeks (Deep Study)</option>
+                            <option value="8">8 Weeks (Comprehensive)</option>
+                        </select>
+                        <select id="plan-hours-select" class="form-control" style="width:auto; padding:6px 12px; font-size:13px; background:rgba(31,41,55,0.8); color:white; border-radius:8px;">
+                            <option value="1">1 Hr/Day</option>
+                            <option value="2" selected>2 Hrs/Day</option>
+                            <option value="3">3 Hrs/Day</option>
+                            <option value="4">4+ Hrs/Day</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="loadConceptMapAndPlan()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Plan & Map</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-circle-nodes" style="color:#c084fc; margin-right:8px;"></i> Visual Concept Map</h3>
+                        <div id="concept-map-canvas" style="min-height:220px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:center; padding:20px; background:rgba(10, 14, 23, 0.6); border-radius:14px; border:1px solid var(--glass-border); margin-top:16px;">
+                            <p style="color:var(--text-muted);">Click "Generate Plan & Map" to render concept nodes.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3><i class="fa-solid fa-calendar-days" style="color:#fbbf24; margin-right:8px;"></i> Personalized Study Plan</h3>
+                            <span id="plan-timeline-badge" class="badge" style="background:rgba(99, 102, 241, 0.2); border:1px solid var(--accent-indigo);">4 Weeks Timeline</span>
+                        </div>
+                        <div id="learning-plan-list" style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+                            <p style="color:var(--text-muted);">Click above to generate your customized study schedule.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="tab-quiz" class="tab-pane">
+                <div class="section-header">
+                    <div>
+                        <h2><i class="fa-solid fa-list-check" style="color:#818cf8; margin-right:8px;"></i> Adaptive Quiz & Assessment</h2>
+                        <p>Generates targeted MCQs and open-ended questions based on your weak concepts and performance history.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="generateNewQuiz()"><i class="fa-solid fa-rotate"></i> Generate Adaptive Quiz</button>
+                </div>
+
+                <div id="quiz-container" class="glass-card">
+                    <div style="text-align:center; padding:40px;">
+                        <i class="fa-solid fa-pen-ruler" style="font-size:48px; color:var(--accent-indigo); margin-bottom:16px;"></i>
+                        <h3>Ready to test your understanding?</h3>
+                        <p style="color:var(--text-muted); margin-top:8px;">Click "Generate Adaptive Quiz" to create custom questions targeted at your learning weak points.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: MASTERY & GROWTH (STRICTLY MASTERY ONLY) -->
+            <section id="tab-mastery" class="tab-pane">
+                <div class="section-header">
+                    <div>
+                        <h2><i class="fa-solid fa-chart-line" style="color:#34d399; margin-right:8px;"></i> Concept Mastery & Growth Analysis</h2>
+                        <p>Tracks estimated understanding level across project concepts based on tutor interactions and assessment performance.</p>
+                    </div>
+                </div>
+
+                <div class="mastery-grid" id="mastery-cards-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- TAB 6: PROJECT ANALYTICS (STRICTLY PROJECT METRICS ONLY) -->
+            <section id="tab-analytics" class="tab-pane">
+                <div class="section-header">
+                    <div>
+                        <h2><i class="fa-solid fa-chart-pie" style="color:#fbbf24; margin-right:8px;"></i> Project Learning Analytics</h2>
+                        <p>Real-time metrics on engagement, assessment performance, and AI resource usage.</p>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <i class="fa-solid fa-comments icon-indigo"></i>
+                        <div>
+                            <span class="stat-val" id="analytics-msgs">0</span>
+                            <span class="stat-lbl">Tutor Messages</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-circle-check icon-green"></i>
+                        <div>
+                            <span class="stat-val" id="analytics-quizzes">0</span>
+                            <span class="stat-lbl">Quizzes Taken</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-trophy icon-amber"></i>
+                        <div>
+                            <span class="stat-val" id="analytics-score">0%</span>
+                            <span class="stat-lbl">Avg Quiz Score</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-coins icon-purple"></i>
+                        <div>
+                            <span class="stat-val" id="analytics-cost">$0.00</span>
+                            <span class="stat-lbl">AI Cost (USD)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: ADMIN DASHBOARD (STRICTLY ADMIN & OBSERVABILITY ONLY) -->
+            <section id="tab-admin" class="tab-pane">
+                <div class="section-header">
+                    <div>
+                        <h2><i class="fa-solid fa-shield-halved" style="color:#818cf8; margin-right:8px;"></i> Admin Dashboard & System Observability</h2>
+                        <p>Platform-level visibility into AI latency, token usage, background workers, and automated model evaluations.</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="runAIEvaluations()"><i class="fa-solid fa-flask"></i> Run AI Evaluations</button>
+                </div>
+
+                <div class="analytics-grid margin-bottom">
+                    <div class="stat-card">
+                        <i class="fa-solid fa-users icon-indigo"></i>
+                        <div>
+                            <span class="stat-val" id="admin-users">0</span>
+                            <span class="stat-lbl">Platform Users</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-microchip icon-purple"></i>
+                        <div>
+                            <span class="stat-val" id="admin-ai-reqs">0</span>
+                            <span class="stat-lbl">Total AI Requests</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-clock-rotate-left icon-amber"></i>
+                        <div>
+                            <span class="stat-val" id="admin-latency">0 ms</span>
+                            <span class="stat-lbl">Avg AI Latency</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-gears icon-green"></i>
+                        <div>
+                            <span class="stat-val" id="admin-jobs">0</span>
+                            <span class="stat-lbl">Active Jobs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Recent AI Usage & Observability Logs</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Model</th>
+                                <th>Tokens</th>
+                                <th>Latency</th>
+                                <th>Cost</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ai-logs-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Create Space Modal -->
+    <div id="modal-space" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3>Create New Space</h3>
+            <div class="form-group">
+                <label>Space Name</label>
+                <input type="text" id="space-name-input" placeholder="e.g. Data Science & AI">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="space-desc-input" placeholder="Broad area of study..." rows="3"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('modal-space')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitCreateSpace()">Create Space</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Project Modal -->
+    <div id="modal-project" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h3>Create New Learning Project</h3>
+            <div class="form-group">
+                <label>Target Space</label>
+                <select id="project-space-select"></select>
+            </div>
+            <div class="form-group">
+                <label>Project Name</label>
+                <input type="text" id="project-name-input" placeholder="e.g. Neural Networks & Deep Learning">
+            </div>
+            <div class="form-group">
+                <label>Learning Goal</label>
+                <input type="text" id="project-goal-input" placeholder="e.g. Master backpropagation and PyTorch implementation">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('modal-project')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitCreateProject()">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Modal (Login / Register) -->
+    <div id="modal-auth" class="modal-overlay" style="display: flex;">
+        <div class="modal-content" style="width: 420px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div class="logo-icon" style="margin: 0 auto 12px; width: 50px; height: 50px; font-size: 26px;">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2>Study<span class="highlight">AI</span> Workspace</h2>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 6px;">Sign in to access your persistent AI Study Companion</p>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-bottom: 20px; background: rgba(10, 14, 23, 0.6); padding: 4px; border-radius: 10px; border: 1px solid var(--glass-border);">
+                <button id="auth-tab-login" class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="switchAuthTab('login')">Login</button>
+                <button id="auth-tab-register" class="btn btn-outline" style="flex: 1; justify-content: center;" onclick="switchAuthTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-auth-login" onsubmit="submitAuthLogin(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username-input" placeholder="e.g. admin or pavani" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password-input" placeholder="••••••••" required>
+                </div>
+                <div id="login-error-msg" style="color: var(--accent-rose); font-size: 13px; margin-top: 10px; display: none;"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;"><i class="fa-solid fa-right-to-bracket"></i> Login to Workspace</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-auth-register" onsubmit="submitAuthRegister(event)" style="display: none;">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="reg-username-input" placeholder="e.g. pavani" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="reg-email-input" placeholder="e.g. pavani@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password-input" placeholder="••••••••" required>
+                </div>
+                <div id="reg-error-msg" style="color: var(--accent-rose); font-size: 13px; margin-top: 10px; display: none;"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 24px; justify-content: center;"><i class="fa-solid fa-user-plus"></i> Create New Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
